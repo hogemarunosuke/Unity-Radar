@@ -11,6 +11,7 @@ public class Radar : BaseBehaviour
     private GameObject player;
     private GameObject radarViewAngle;
     private GameObject freeLookCameraRig;
+    private GameObject targetIcon;
     private float detectionRange = 100.0f;
     private float radarRadius;
 
@@ -30,6 +31,9 @@ public class Radar : BaseBehaviour
 
         // Set the FreeLookCameraRig. (or another Camera object that you can get eulerAngles.)
         freeLookCameraRig = GameObject.Find("FreeLookCameraRig");
+
+        // Set the TargetIcon.
+        targetIcon = GameObject.Find("TargetIcon");
 
         // Get the radius of radar.
         radarRadius = GetComponent<RectTransform>().sizeDelta.x / 2.0f;
@@ -57,6 +61,13 @@ public class Radar : BaseBehaviour
         {
             PlotEnemyIcons(enemy.transform.position);
         }
+
+        // Plot the target enemy.
+        var targetEnemy = enemys.Where(enemy => enemy.GetComponent<BaseEnemy>().GetRadarSpike() == true).FirstOrDefault();
+        if (targetEnemy != null)
+        {
+            PlotTargetEnemy(targetEnemy.transform.position);
+        }
     }
 
     /// <summary>
@@ -68,6 +79,8 @@ public class Radar : BaseBehaviour
         {
             enemyIcon.SetActive(false);
         }
+
+        targetIcon.SetActive(false);
     }
 
     /// <summary>
@@ -78,6 +91,17 @@ public class Radar : BaseBehaviour
     {
         Vector3 plotPos = (enemyPos - player.transform.position) * (radarRadius / detectionRange);
         RectTransform iconRect = GetEnemyIcon().GetComponent<RectTransform>();
+        iconRect.anchoredPosition = new Vector2(plotPos.x, plotPos.z);
+    }
+
+    /// <summary>
+    /// Plot the target enemy.
+    /// </summary>
+    /// <param name="enemyPos">The position of enemy.</param>
+    private void PlotTargetEnemy(Vector3 enemyPos)
+    {
+        Vector3 plotPos = (enemyPos - player.transform.position) * (radarRadius / detectionRange);
+        RectTransform iconRect = GetTargetIcon().GetComponent<RectTransform>();
         iconRect.anchoredPosition = new Vector2(plotPos.x, plotPos.z);
     }
 
@@ -101,6 +125,16 @@ public class Radar : BaseBehaviour
         enemyIconCollection.Add(newEnemyIcon);
 
         return newEnemyIcon;
+    }
+
+    /// <summary>
+    /// Get target icon.
+    /// </summary>
+    /// <returns>The target object.</returns>
+    private GameObject GetTargetIcon()
+    {
+        targetIcon.SetActive(true);
+        return targetIcon;
     }
 
     /// <summary>
